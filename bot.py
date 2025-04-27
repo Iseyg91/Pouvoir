@@ -1814,10 +1814,11 @@ async def capture(ctx, target: discord.Member):
     target_id = target.id
 
     # Vérifier si l'auteur a l'un des rôles autorisés
-    allowed_roles = ['ISEY_PIRATE', 'ISEY_MARINE']
+    allowed_roles = ['ISEY_PIRATE', 'ISEY_MARINE']  # Remplace par les IDs exacts des rôles
     author_roles = [role.id for role in ctx.author.roles]
     print(f"Rôles de l'auteur: {author_roles}")
     
+    # Vérification correcte des rôles de l'auteur
     if not any(role.id in allowed_roles for role in ctx.author.roles):
         await ctx.send("Vous devez avoir un rôle autorisé pour capturer des cibles.")
         return
