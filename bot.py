@@ -80,6 +80,10 @@ MALUS_ROLE_ID = 1363969965572755537
 # -- Benediction --
 BENEDICTION_ROLE_ID = 1364294230343684137
 
+# -- Marine & Pirates --
+ISEY_MARINE = 1365631932964012142
+ISEY_PIRATE = 1365682636957421741
+
 # --- ID Etherya Nen ---
 # Rôle autorisé à utiliser le Nen
 PERMISSION_ROLE_ID = 1363928528587984998
@@ -1765,11 +1769,11 @@ async def capture_user(captor_id, target_id, captor_roles, target_roles):
     target_bounty = await get_bounty(target_id)
 
     # Vérifier les rôles des capturants et des cibles
-    captor_is_marine = any(role.id in marine_roles.values() for role in captor_roles)
-    target_is_pirate = any(role.id in pirate_roles.values() for role in target_roles)
+    captor_is_marine = any(role.id == 'ISEY_MARINE' for role in captor_roles)
+    target_is_pirate = any(role.id == 'ISEY_PIRATE' for role in target_roles)
 
-    captor_is_pirate = any(role.id in pirate_roles.values() for role in captor_roles)
-    target_is_marine = any(role.id in marine_roles.values() for role in target_roles)
+    captor_is_pirate = any(role.id == 'ISEY_PIRATE' for role in captor_roles)
+    target_is_marine = any(role.id == 'ISEY_MARINE' for role in target_roles)
 
     if (captor_is_marine and target_is_marine) or (captor_is_pirate and target_is_pirate):
         await ctx.send("Les Marines ne peuvent capturer que les Pirates et inversement.")
@@ -1810,7 +1814,7 @@ async def capture(ctx, target: discord.Member):
     target_id = target.id
 
     # Vérifier si l'auteur a l'un des rôles autorisés
-    allowed_roles = [1365682636957421741, 1365631932964012142]
+    allowed_roles = ['ISEY_PIRATE', 'ISEY_MARINE']
     author_roles = [role.id for role in ctx.author.roles]
     print(f"Rôles de l'auteur: {author_roles}")
     
@@ -1822,13 +1826,13 @@ async def capture(ctx, target: discord.Member):
     captor_roles = ctx.author.roles
     target_roles = target.roles
 
-    if any(role.id in pirate_roles.values() for role in captor_roles):  # Si le captor est un pirate
-        if any(role.id in marine_roles.values() for role in target_roles):
+    if any(role.id == 'ISEY_PIRATE' for role in captor_roles):  # Si le captor est un pirate
+        if any(role.id == 'ISEY_MARINE' for role in target_roles):
             await capture_user(captor_id, target_id, captor_roles, target_roles)
         else:
             await ctx.send("Vous devez capturer un Marine.")
-    elif any(role.id in marine_roles.values() for role in captor_roles):  # Si le captor est un marine
-        if any(role.id in pirate_roles.values() for role in target_roles):
+    elif any(role.id == 'ISEY_MARINE' for role in captor_roles):  # Si le captor est un marine
+        if any(role.id == 'ISEY_PIRATE' for role in target_roles):
             await capture_user(captor_id, target_id, captor_roles, target_roles)
         else:
             await ctx.send("Vous devez capturer un Pirate.")
