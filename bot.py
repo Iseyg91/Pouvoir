@@ -3040,6 +3040,54 @@ async def neutre(ctx):
 
     await ctx.send(embed=embed, view=ChooseCamp(ctx.author.id))
 
+PING_ROLE_ID = 1355190216188497951
+
+@bot.command(name="divin")
+async def divin(ctx, member: discord.Member):
+    if ctx.author.id != ISEY_ID:
+        return await ctx.send("Tu n'as pas la permission d'utiliser cette commande.")
+
+    guild_id = ctx.guild.id
+    user_id = member.id
+
+    # Données MongoDB
+    data = collection.find_one({"guild_id": guild_id, "user_id": user_id})
+    if not data:
+        data = {"guild_id": guild_id, "user_id": user_id, "cash": 1500, "bank": 0}
+        collection.insert_one(data)
+
+    # Ajout des 500 000 à la banque
+    new_bank = data.get("bank", 0) + 500_000
+    collection.update_one(
+        {"guild_id": guild_id, "user_id": user_id},
+        {"$set": {"bank": new_bank}}
+    )
+
+    # Attribution du rôle divin
+    role = ctx.guild.get_role(DIVIN_ROLE_ID)
+    if role:
+        await member.add_roles(role)
+
+    # Ping du rôle juste avant
+    await ctx.send(f"<@&{PING_ROLE_ID}>")
+
+    # Embed ZINZIN
+    embed = discord.Embed(
+        title="🌌 L'ŒIL DIVIN D'ETHER S'EST OUVERT 🌌",
+        description=(
+            f"⚠️ **Instabilité cosmique détectée...**\n\n"
+            f"Une énergie ancestrale vient de traverser les dimensions.\n\n"
+            f"**{member.mention}** a été **choisi par l’Œil Divin d’Ether**, une relique d’un autre monde.\n\n"
+            f"Son corps vibre d’un pouvoir **unique et inconnu**.\n"
+            f"**+500,000** <:ecoEther:1341862366249357374> ont été déposés dans sa banque.\n"
+            f"Le rôle <@&{DIVIN_ROLE_ID}> lui est désormais lié à jamais."
+        ),
+        color=discord.Color.purple()
+    )
+    embed.set_image(url="https://github.com/Iseyg91/Jeux_Eco/blob/main/76b1909809e2fcb7caa7f9cfa3e222c5.png?raw=true")
+    embed.set_footer(text="⚡ Un nouvel équilibre vient de naître… ou de s'effondrer.")
+
+    await ctx.send(embed=embed)
 # Token pour démarrer le bot (à partir des secrets)
 # Lancer le bot avec ton token depuis l'environnement  
 keep_alive()
