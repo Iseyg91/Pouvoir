@@ -1075,7 +1075,7 @@ async def imperial(ctx, cible: discord.Member = None):
     if total_cible <= total_auteur:
         return await ctx.send("❌ Tu ne peux voler que quelqu'un de plus riche que toi.")
 
-    roll = random.randint(1, 75)
+    roll = random.randint(15, 75)
     pourcentage = roll / 100
     vol_total = int(total_cible * pourcentage)
 
