@@ -1779,8 +1779,7 @@ async def start_background_tasks():
     if not task_annonce_jour or task_annonce_jour.done():
         task_annonce_jour = asyncio.create_task(annonce_jour())
 
-# Fonction pour capturer un utilisateur
-async def capture_user(ctx, captor_id, target_id, captor_roles, target_roles):
+async def capture_user(ctx, captor_id, target_id, captor_roles, target_roles, target):
     captor_bounty = await get_bounty(captor_id)
     target_bounty = await get_bounty(target_id)
 
@@ -1845,12 +1844,12 @@ async def capture(ctx, target: discord.Member):
 
     if any(role.id == ISEY_PIRATE_ID for role in captor_roles):
         if any(role.id == ISEY_MARINE_ID for role in target_roles):
-            await capture_user(ctx, captor_id, target_id, captor_roles, target_roles)
+            await capture_user(ctx, captor_id, target_id, captor_roles, target_roles, target)
         else:
             await ctx.send("Vous devez capturer un Marine.")
     elif any(role.id == ISEY_MARINE_ID for role in captor_roles):
         if any(role.id == ISEY_PIRATE_ID for role in target_roles):
-            await capture_user(ctx, captor_id, target_id, captor_roles, target_roles)
+            await capture_user(ctx, captor_id, target_id, captor_roles, target_roles, target)
         else:
             await ctx.send("Vous devez capturer un Pirate.")
     else:
