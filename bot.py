@@ -2818,8 +2818,8 @@ async def rayleigh(ctx):
 
     armement_v1 = 1365698043684327424
     observation_v1 = 1365698125754404975
-    armement_v2 = 1365699245377847448
-    observation_v2 = 1365699319163785246
+    armement_v2 = 1365699319163785246
+    observation_v2 = 1365699245377847448
 
     required_roles = [armement_v1, observation_v1]
 
