@@ -1796,7 +1796,7 @@ async def capture_user(ctx, captor_id, target_id, captor_roles, target_roles):
         return
 
     # Cooldown
-    cooldown_data = cd_capture_ether_collection.find_one({"user_id": captor_id})
+    cooldown_data = collection39.find_one({"user_id": captor_id})
     if cooldown_data and datetime.utcnow() < cooldown_data["next_capture"]:
         time_remaining = cooldown_data["next_capture"] - datetime.utcnow()
         await ctx.send(f"Vous devez attendre encore {time_remaining} avant de capturer quelqu'un.")
@@ -1812,8 +1812,8 @@ async def capture_user(ctx, captor_id, target_id, captor_roles, target_roles):
     if target_bounty > captor_bounty:
         loss = target_bounty // 2
         gain = loss
-        ether_bounty_collection.update_one({"user_id": captor_id}, {"$inc": {"prime": -loss}}, upsert=True)
-        ether_bounty_collection.update_one({"user_id": target_id}, {"$inc": {"prime": gain}}, upsert=True)
+        collection37.update_one({"user_id": captor_id}, {"$inc": {"prime": -loss}}, upsert=True)
+        collection37.update_one({"user_id": target_id}, {"$inc": {"prime": gain}}, upsert=True)
         await ctx.send(f"{ctx.author.name} a capturé {target.name}, il a perdu {loss} de prime et {target.name} a gagné {gain} de prime.")
     else:
         await ctx.send(f"{ctx.author.name} a capturé {target.name}, mais rien n'a changé car les primes sont égales ou {ctx.author.name} a plus de prime.")
