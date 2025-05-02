@@ -81,6 +81,7 @@ MALUS_ROLE_ID = 1363969965572755537
 BENEDICTION_ROLE_ID = 1364294230343684137
 # -- Divin --
 DIVIN_ROLE_ID = 1367567412886765589
+
 # -- Marine & Pirates --
 ISEY_MARINE = 1365631932964012142
 ISEY_PIRATE = 1365682636957421741
@@ -1765,41 +1766,38 @@ async def get_honor(user_id):
     return honor['honor'] if honor else 50
 
 # Fonction pour capturer un utilisateur
-async def capture_user(captor_id, target_id, captor_roles, target_roles):
+async def capture_user(ctx, captor_id, target_id, captor_roles, target_roles):
     captor_bounty = await get_bounty(captor_id)
     target_bounty = await get_bounty(target_id)
 
-    # Vérifier les rôles des capturants et des cibles
-    captor_is_marine = any(role.id == 'ISEY_MARINE' for role in captor_roles)
-    target_is_pirate = any(role.id == 'ISEY_PIRATE' for role in target_roles)
+    # Vérifier les rôles
+    captor_is_marine = any(role.id == ISEY_MARINE_ID for role in captor_roles)
+    target_is_pirate = any(role.id == ISEY_PIRATE_ID for role in target_roles)
 
-    captor_is_pirate = any(role.id == 'ISEY_PIRATE' for role in captor_roles)
-    target_is_marine = any(role.id == 'ISEY_MARINE' for role in target_roles)
+    captor_is_pirate = any(role.id == ISEY_PIRATE_ID for role in captor_roles)
+    target_is_marine = any(role.id == ISEY_MARINE_ID for role in target_roles)
 
     if (captor_is_marine and target_is_marine) or (captor_is_pirate and target_is_pirate):
         await ctx.send("Les Marines ne peuvent capturer que les Pirates et inversement.")
         return
 
-    # Récupérer le cooldown de capture
+    # Cooldown
     cooldown_data = cd_capture_ether_collection.find_one({"user_id": captor_id})
     if cooldown_data and datetime.utcnow() < cooldown_data["next_capture"]:
         time_remaining = cooldown_data["next_capture"] - datetime.utcnow()
         await ctx.send(f"Vous devez attendre encore {time_remaining} avant de capturer quelqu'un.")
         return
 
-    # Calcul des chances de réussite basées sur la prime de la cible
-    success_chance = max(0.1, 1 - (target_bounty / 200))  # Moins de chances si la prime est élevée
+    # Chances de réussite
+    success_chance = max(0.1, 1 - (target_bounty / 200))
     if random.random() > success_chance:
         await ctx.send(f"{ctx.author.name} a tenté de capturer {target.name}, mais la capture a échoué.")
         return
 
-    # Si la prime de la cible est plus élevée que celle du captor
+    # Gestion des primes
     if target_bounty > captor_bounty:
-        # Le captor perd une partie de sa prime, et la cible gagne une partie
         loss = target_bounty // 2
         gain = loss
-
-        # Mise à jour des primes
         ether_bounty_collection.update_one({"user_id": captor_id}, {"$inc": {"prime": -loss}}, upsert=True)
         ether_bounty_collection.update_one({"user_id": target_id}, {"$inc": {"prime": gain}}, upsert=True)
         await ctx.send(f"{ctx.author.name} a capturé {target.name}, il a perdu {loss} de prime et {target.name} a gagné {gain} de prime.")
@@ -1807,35 +1805,38 @@ async def capture_user(captor_id, target_id, captor_roles, target_roles):
         await ctx.send(f"{ctx.author.name} a capturé {target.name}, mais rien n'a changé car les primes sont égales ou {ctx.author.name} a plus de prime.")
 
     # Mise à jour du cooldown
-    cd_capture_ether_collection.update_one({"user_id": captor_id}, {"$set": {"next_capture": datetime.utcnow() + timedelta(hours=12)}}, upsert=True)
+    cd_capture_ether_collection.update_one(
+        {"user_id": captor_id},
+        {"$set": {"next_capture": datetime.utcnow() + timedelta(hours=12)}},
+        upsert=True
+    )
 
 @bot.command()
 async def capture(ctx, target: discord.Member):
     captor_id = ctx.author.id
     target_id = target.id
 
-    # Vérifier si l'auteur a l'un des rôles autorisés
-    allowed_roles = ['ISEY_PIRATE', 'ISEY_MARINE']  # Remplace par les IDs exacts des rôles
-    author_roles = [role.id for role in ctx.author.roles]
-    print(f"Rôles de l'auteur: {author_roles}")
+    allowed_roles = [ISEY_PIRATE_ID, ISEY_MARINE_ID]
+    author_roles_ids = [role.id for role in ctx.author.roles]
+
+    # Debug : Afficher les rôles pour vérification
+    print(f"Rôles de l'auteur : {author_roles_ids}")
     
-    # Vérification correcte des rôles de l'auteur
-    if not any(role.id in allowed_roles for role in ctx.author.roles):
+    if not any(role_id in allowed_roles for role_id in author_roles_ids):
         await ctx.send("Vous devez avoir un rôle autorisé pour capturer des cibles.")
         return
 
-    # Vérifier si la cible est un pirate ou un marine
     captor_roles = ctx.author.roles
     target_roles = target.roles
 
-    if any(role.id == 'ISEY_PIRATE' for role in captor_roles):  # Si le captor est un pirate
-        if any(role.id == 'ISEY_MARINE' for role in target_roles):
-            await capture_user(captor_id, target_id, captor_roles, target_roles)
+    if any(role.id == ISEY_PIRATE_ID for role in captor_roles):
+        if any(role.id == ISEY_MARINE_ID for role in target_roles):
+            await capture_user(ctx, captor_id, target_id, captor_roles, target_roles)
         else:
             await ctx.send("Vous devez capturer un Marine.")
-    elif any(role.id == 'ISEY_MARINE' for role in captor_roles):  # Si le captor est un marine
-        if any(role.id == 'ISEY_PIRATE' for role in target_roles):
-            await capture_user(captor_id, target_id, captor_roles, target_roles)
+    elif any(role.id == ISEY_MARINE_ID for role in captor_roles):
+        if any(role.id == ISEY_PIRATE_ID for role in target_roles):
+            await capture_user(ctx, captor_id, target_id, captor_roles, target_roles)
         else:
             await ctx.send("Vous devez capturer un Pirate.")
     else:
