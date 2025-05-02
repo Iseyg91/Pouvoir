@@ -1765,8 +1765,6 @@ async def get_honor(user_id):
     honor = collection38.find_one({"user_id": user_id})
     return honor['honor'] if honor else 50
 
-import asyncio
-
 task_annonce_jour = None  # Déclaration globale de la tâche
 
 async def annonce_jour():
@@ -1783,15 +1781,16 @@ async def capture_user(ctx, captor_id, target_id, captor_roles, target_roles, ta
     captor_bounty = await get_bounty(captor_id)
     target_bounty = await get_bounty(target_id)
 
-    # Vérifier les rôles
-    captor_is_marine = any(role.id == ISEY_MARINE_ID for role in captor_roles)
+    # Vérifier si la capture peut se faire (pirate ou marine)
+    captor_is_pirate = any(role.id == ISEY_PIRATE_ID for role in captor_roles)
     target_is_pirate = any(role.id == ISEY_PIRATE_ID for role in target_roles)
 
-    captor_is_pirate = any(role.id == ISEY_PIRATE_ID for role in captor_roles)
+    captor_is_marine = any(role.id == ISEY_MARINE_ID for role in captor_roles)
     target_is_marine = any(role.id == ISEY_MARINE_ID for role in target_roles)
 
-    if (captor_is_marine and target_is_marine) or (captor_is_pirate and target_is_pirate):
-        await ctx.send("Les Marines ne peuvent capturer que les Pirates et inversement.")
+    # Un pirate peut capturer un pirate ou un marine et inversement
+    if not (captor_is_pirate and (target_is_pirate or target_is_marine)) and not (captor_is_marine and target_is_pirate):
+        await ctx.send("Les pirates peuvent capturer les pirates et les marines, et les marines peuvent capturer les pirates.")
         return
 
     # Cooldown
@@ -1842,16 +1841,9 @@ async def capture(ctx, target: discord.Member):
     captor_roles = ctx.author.roles
     target_roles = target.roles
 
-    if any(role.id == ISEY_PIRATE_ID for role in captor_roles):
-        if any(role.id == ISEY_MARINE_ID for role in target_roles):
-            await capture_user(ctx, captor_id, target_id, captor_roles, target_roles, target)
-        else:
-            await ctx.send("Vous devez capturer un Marine.")
-    elif any(role.id == ISEY_MARINE_ID for role in captor_roles):
-        if any(role.id == ISEY_PIRATE_ID for role in target_roles):
-            await capture_user(ctx, captor_id, target_id, captor_roles, target_roles, target)
-        else:
-            await ctx.send("Vous devez capturer un Pirate.")
+    # Vérification des rôles pour la capture
+    if any(role.id == ISEY_PIRATE_ID for role in captor_roles) or any(role.id == ISEY_MARINE_ID for role in captor_roles):
+        await capture_user(ctx, captor_id, target_id, captor_roles, target_roles, target)
     else:
         await ctx.send("Seuls les pirates et marines peuvent capturer des cibles.")
 
