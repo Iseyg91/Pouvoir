@@ -1765,6 +1765,20 @@ async def get_honor(user_id):
     honor = collection38.find_one({"user_id": user_id})
     return honor['honor'] if honor else 50
 
+import asyncio
+
+task_annonce_jour = None  # Déclaration globale de la tâche
+
+async def annonce_jour():
+    while True:
+        print("Annonce du jour")  # À remplacer par ton vrai comportement
+        await asyncio.sleep(86400)  # Une fois par jour
+
+async def start_background_tasks():
+    global task_annonce_jour
+    if not task_annonce_jour or task_annonce_jour.done():
+        task_annonce_jour = asyncio.create_task(annonce_jour())
+
 # Fonction pour capturer un utilisateur
 async def capture_user(ctx, captor_id, target_id, captor_roles, target_roles):
     captor_bounty = await get_bounty(captor_id)
