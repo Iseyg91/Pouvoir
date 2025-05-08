@@ -1877,7 +1877,7 @@ async def bombe(ctx, target: discord.Member = None):
     author_id = ctx.author.id
 
     # Vérification du rôle de l'auteur
-    if author_id != 1365316070172393572:
+    AUTHORIZED_ROLE_ID = 1365316070172393572:
         await ctx.send("❌ Tu n'es pas autorisé à utiliser cette commande.")
         # Log : l'utilisateur n'a pas le rôle requis
         await log_eco_channel(
