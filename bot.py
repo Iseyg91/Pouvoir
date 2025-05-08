@@ -81,7 +81,8 @@ MALUS_ROLE_ID = 1363969965572755537
 BENEDICTION_ROLE_ID = 1364294230343684137
 # -- Divin --
 DIVIN_ROLE_ID = 1367567412886765589
-
+# -- Bombe --
+BOMBE_ID = 1365316070172393572
 # -- Marine & Pirates --
 ISEY_MARINE_ID = 1365631932964012142
 ISEY_PIRATE_ID = 1365682636957421741
@@ -1876,9 +1877,10 @@ async def reset_prime(ctx):
 async def bombe(ctx, target: discord.Member = None):
     author_id = ctx.author.id
 
-    # Vérification du rôle de l'auteur
-    AUTHORIZED_ROLE_ID = 1365316070172393572:
-        await ctx.send("❌ Tu n'es pas autorisé à utiliser cette commande.")
+
+if BOMBE_ID not in [role.id for role in ctx.author.roles]:
+    await ctx.send("❌ Tu n'as pas le rôle requis pour utiliser cette commande.")
+    return
         # Log : l'utilisateur n'a pas le rôle requis
         await log_eco_channel(
             bot, ctx.guild.id, ctx.author,
