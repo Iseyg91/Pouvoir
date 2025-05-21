@@ -1877,10 +1877,9 @@ async def reset_prime(ctx):
 async def bombe(ctx, target: discord.Member = None):
     author_id = ctx.author.id
 
-
-if BOMBE_ID not in [role.id for role in ctx.author.roles]:
-    await ctx.send("❌ Tu n'as pas le rôle requis pour utiliser cette commande.")
-    return
+    # Vérification du rôle
+    if BOMBE_ID not in [role.id for role in ctx.author.roles]:
+        await ctx.send("❌ Tu n'as pas le rôle requis pour utiliser cette commande.")
         # Log : l'utilisateur n'a pas le rôle requis
         await log_eco_channel(
             bot, ctx.guild.id, ctx.author,
@@ -1970,9 +1969,6 @@ if BOMBE_ID not in [role.id for role in ctx.author.roles]:
     )
     embed.set_thumbnail(url="https://static.wikia.nocookie.net/onepiece/images/8/86/Bomu_Bomu_no_Mi_Anime_Infobox.png/revision/latest?cb=20181120231615&path-prefix=fr")
     await ctx.send(embed=embed)
-
-# Configurer le logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 #------------------------------------------------- Gura Gura no Mi
 @bot.command(name="gura")
