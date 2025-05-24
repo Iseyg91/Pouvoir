@@ -74,3 +74,4 @@ PyNaCl
 psutil
 motor
 pytz
+matplotlib
